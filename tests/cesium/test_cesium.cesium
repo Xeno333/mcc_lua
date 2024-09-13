@@ -1,0 +1,8 @@
+
+
+u8* str = "Hello, World"
+
+func main() : i32 {
+	print(str)
+	return 0
+}
