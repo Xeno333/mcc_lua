@@ -2,16 +2,22 @@ cesium.parser = {}
 
 
 function cesium.parser.parse(src)
+    -- open file and check error
     local file, err = io.open(src, "r")
     if not file then
         print("Failed: Error opening file: " .. err)
         return false
     end
 
+    -- get src file
     local src_code = file:read("*a")
-    local lines = {""}
+
+    -- Token table that we will return
     local tokens = {}
-    local sep_chars = "([]{}!%^&*-=+|/,?~ "
+
+    local lines = {""}
+
+    local sep_chars = "()[]{} !><= ~^&| %/-+ * , ?"
     local break_chars = ";\n"
     local quote = false
     local esc = nil
