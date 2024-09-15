@@ -45,7 +45,10 @@ function hrriscasm.parser.parse(src)
     end
 
     for _, line in ipairs(lines) do
-        print(line)
+        tokens[#tokens+1] = {}
+        for part in string.gmatch(line, "[^%s,]+") do
+            tokens[#tokens][#tokens[#tokens]+1] = part
+        end
     end
 
     file:close()
