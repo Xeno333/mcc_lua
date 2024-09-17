@@ -151,6 +151,7 @@ local function compile(src, dest)
                     return false
                 end
                 
+                -- or together opcode and size of oprands
                 instruction.opcode = bit.bor(bit.lshift(math.log(size, 2), 6), instructions[token[1]].opcode)
 
                 -- Get oprand 1 check if mem ref first then default to reg
@@ -161,7 +162,6 @@ local function compile(src, dest)
                 else
                     opr1 = registers[token[3]]
                 end
-
                 if opr1 == nil then
                     print("Error occered! Line " .. ln .. " has bad opprand 1!")
                     return false
@@ -176,13 +176,11 @@ local function compile(src, dest)
                 else
                     opr2 = registers[token[3]]
                 end
-
                 if opr2 == nil then
                     print("Error occered! Line " .. ln .. " has bad opprand 2!")
                     return false
                 end
                 instruction.oprand = bit.bor(instruction.oprand, opr2) 
-                print(to_binary(instruction.opcode) .. " " .. to_binary(instruction.oprand))
             else
                 print("hm")
             end
