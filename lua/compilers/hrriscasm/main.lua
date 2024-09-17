@@ -3,8 +3,26 @@ hrriscasm = {}
 mcc.compilers["hrriscasm"] = hrriscasm
 local code_path = nil
 
+require("bit")
 
-local instruction = {
+
+-- debugin take out in production
+local function to_binary(n)
+    local binary = ""
+    while n > 0 do
+        local bit = n % 2  -- Extract the least significant bit
+        binary = bit .. binary  -- Append the bit to the left of the binary string
+        n = math.floor(n / 2)  -- Shift right by dividing by 2
+    end
+    return binary ~= "" and binary or "0"  -- Return "0" if the number is 0
+end
+
+
+
+-- real
+
+
+local instructions = {
     ["mul"] = {
         operand_c = 2,
         opcode = 0
@@ -71,6 +89,45 @@ local instruction = {
     },
 }
 
+local registers = {
+    ["r0"] = 0,
+    ["r1"] = 1,
+    ["r2"] = 2,
+    ["r3"] = 3,
+    ["r4"] = 4,
+    ["r5"] = 5,
+    ["r6"] = 6,
+    ["r7"] = 7,
+    ["r8"] = 8,
+    ["r9"] = 9,
+    ["r10"] = 10,
+    ["r11"] = 11,
+    ["r12"] = 12,
+    ["r13"] = 13,
+    ["r14"] = 14,
+    ["r15"] = 15,
+}
+
+local sizes = {
+    ["b"] = 1,
+    ["w"] = 2,
+    ["d"] = 4,
+    ["q"] = 8,
+}
+
+
+
+
+local function extract_mem(str)
+    -- Check if the string starts with '[' and ends with ']'
+    if str:match("^%[(.-)%]$") then
+        -- Extract and return the content between '[' and ']'
+        return str:match("^%[(.-)%]$")
+    else
+        -- Return nil or an appropriate message if the string does not meet the criteria
+        return nil
+    end
+end
 
 
 local function compile(src, dest)
@@ -79,10 +136,55 @@ local function compile(src, dest)
         return false
     end
 
-    for _, token in ipairs(tokens) do
-        for _, part in ipairs(token) do
-            if instruction[part] then
-                print(instruction[part].opcode)
+    for ln, token in ipairs(tokens) do
+        if token[1] then
+            local instruction = {
+                opcode = 0, 
+                oprand = 0,
+            }
+
+            -- handel instructions as 2 types, "normal" aka set length and "hm" aka annoying
+            if instructions[token[1]] and instructions[token[1]].operand_c == 2 then
+                local size = sizes[token[2]]
+                if not size then
+                    print("Error occered! Line " .. ln .. " has an incorrect size value!")
+                    return false
+                end
+                
+                instruction.opcode = bit.bor(bit.lshift(math.log(size, 2), 6), instructions[token[1]].opcode)
+
+                -- Get oprand 1 check if mem ref first then default to reg
+                local opr1 = extract_mem(token[3])
+                if opr1 then
+                    instruction.opcode = bit.bor(bit.lshift(1, 5), instruction.opcode)
+                    opr1 = registers[opr1]
+                else
+                    opr1 = registers[token[3]]
+                end
+
+                if opr1 == nil then
+                    print("Error occered! Line " .. ln .. " has bad opprand 1!")
+                    return false
+                end
+                instruction.oprand = bit.bor(instruction.oprand, bit.lshift(opr1, 4)) 
+                
+                -- Get oprand 2 check if mem ref first then default to reg
+                local opr2 = extract_mem(token[4])
+                if opr2 then
+                    instruction.opcode = bit.bor(bit.lshift(1, 4), instruction.opcode)
+                    opr2 = registers[opr2]
+                else
+                    opr2 = registers[token[3]]
+                end
+
+                if opr2 == nil then
+                    print("Error occered! Line " .. ln .. " has bad opprand 2!")
+                    return false
+                end
+                instruction.oprand = bit.bor(instruction.oprand, opr2) 
+                print(to_binary(instruction.opcode) .. " " .. to_binary(instruction.oprand))
+            else
+                print("hm")
             end
         end
     end
