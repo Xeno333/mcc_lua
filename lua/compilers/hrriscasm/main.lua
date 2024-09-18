@@ -81,7 +81,7 @@ local instructions = {
         opcode = 13
     },
     ["cmov"] = {
-        operand_c = 2,
+        operand_c = 3,
         opcode = 14
     },
     ["xtn"] = {
@@ -136,12 +136,16 @@ local function compile(src, dest)
         return false
     end
 
+    local bin = {}
+
     for ln, token in ipairs(tokens) do
         if token[1] then
             local instruction = {
                 opcode = 0, 
                 oprand = 0,
             }
+
+            local type = nil
 
             -- handel instructions as 2 types, "normal" aka set length and "hm" aka annoying
             if instructions[token[1]] and instructions[token[1]].operand_c == 2 then
@@ -181,9 +185,96 @@ local function compile(src, dest)
                     return false
                 end
                 instruction.oprand = bit.bor(instruction.oprand, opr2) 
+
+                type = "norm"
+
             else
-                print("hm")
+                if token[1] == "set" then
+                    print("set")
+
+                elseif token[1] == "push" then
+                    local size = sizes[token[2]]
+                    if not size then
+                        print("Error occered! Line " .. ln .. " has an incorrect size value!")
+                        return false
+                    end
+                    
+                    -- or together opcode and size of oprands
+                    instruction.opcode = bit.bor(bit.lshift(math.log(size, 2), 6), instructions[token[1]].opcode)
+
+                    -- Get oprand 1 check if mem ref first then default to reg
+                    local opr1 = extract_mem(token[3])
+                    if opr1 then
+                        instruction.opcode = bit.bor(bit.lshift(1, 5), instruction.opcode)
+                        opr1 = registers[opr1]
+                    else
+                        opr1 = registers[token[3]]
+                    end
+                    if opr1 == nil then
+                        print("Error occered! Line " .. ln .. " has bad opprand 1!")
+                        return false
+                    end
+                    instruction.oprand = bit.bor(instruction.oprand, opr1) 
+
+                    bin[#bin + 1] = instruction.opcode
+                    bin[#bin + 1] = instruction.oprand
+
+                elseif token[1] == "pop" then
+                    local size = sizes[token[2]]
+                    if not size then
+                        print("Error occered! Line " .. ln .. " has an incorrect size value!")
+                        return false
+                    end
+                    
+                    -- or together opcode and size of oprands
+                    instruction.opcode = bit.bor(bit.lshift(math.log(size, 2), 6), instructions[token[1]].opcode)
+
+                    -- Get oprand 1 check if mem ref first then default to reg
+                    local opr1 = extract_mem(token[3])
+                    if opr1 then
+                        instruction.opcode = bit.bor(bit.lshift(1, 5), instruction.opcode)
+                        opr1 = registers[opr1]
+                    else
+                        opr1 = registers[token[3]]
+                    end
+                    if opr1 == nil then
+                        print("Error occered! Line " .. ln .. " has bad opprand 1!")
+                        return false
+                    end
+                    instruction.oprand = bit.bor(instruction.oprand, bit.lshift(opr1, 4)) 
+
+                    bin[#bin + 1] = instruction.opcode
+                    bin[#bin + 1] = instruction.oprand
+
+                elseif token[1] == "cmov" then
+                    print("cmov")
+
+                elseif token[1] == "xtn" then
+                    print("xtn")
+                    
+                else
+                    print("Error occered! Line " .. ln .. " has invalid instruction!")
+                    --return false
+                end
             end
+
+            if type == "norm" then
+                bin[#bin + 1] = instruction.opcode
+                bin[#bin + 1] = instruction.oprand
+            end
+        end
+    end
+
+    print("\n\n")
+    
+
+    local i = 0
+    for _, byte in ipairs(bin) do
+        io.write(string.format("0x%X", byte) .. " ")
+        i = i + 1
+        if i == 2 then
+            print("")
+            i = 0
         end
     end
 
