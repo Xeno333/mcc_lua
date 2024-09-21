@@ -7,4 +7,5 @@ main:
     mov q r2, [r1]
     xor q r2, r2
     xor q r0, r0
+    cmov q r1, r2, r3
     pop q r15

@@ -66,15 +66,18 @@ local instructions = {
     ["set"] = {
         operand_c = 2,
         immediate = true, -- Corrected syntax
-        opcode = 10
+        opcode = 10,
+        complex = true
     },
     ["push"] = {
         operand_c = 1,
-        opcode = 11
+        opcode = 11,
+        complex = true
     },
     ["pop"] = {
         operand_c = 1,
-        opcode = 12
+        opcode = 12,
+        complex = true
     },
     ["cmp"] = {
         operand_c = 2,
@@ -82,10 +85,12 @@ local instructions = {
     },
     ["cmov"] = {
         operand_c = 3,
-        opcode = 14
+        opcode = 14,
+        complex = true
     },
     ["xtn"] = {
-        opcode = 15
+        opcode = 15,
+        complex = true
     },
 }
 
@@ -148,7 +153,7 @@ local function compile(src, dest)
             local type = nil
 
             -- handel instructions as 2 types, "normal" aka set length and "hm" aka annoying
-            if instructions[token[1]] and instructions[token[1]].operand_c == 2 then
+            if instructions[token[1]] and instructions[token[1]].operand_c == 2 and not instructions[token[1]].complex then
                 local size = sizes[token[2]]
                 if not size then
                     print("Error occered! Line " .. ln .. " has an incorrect size value!")
@@ -178,7 +183,7 @@ local function compile(src, dest)
                     instruction.opcode = bit.bor(bit.lshift(1, 4), instruction.opcode)
                     opr2 = registers[opr2]
                 else
-                    opr2 = registers[token[3]]
+                    opr2 = registers[token[4]]
                 end
                 if opr2 == nil then
                     print("Error occered! Line " .. ln .. " has bad opprand 2!")
@@ -188,6 +193,8 @@ local function compile(src, dest)
 
                 type = "norm"
 
+
+                
             else
                 if token[1] == "set" then
                     print("set")
@@ -219,6 +226,9 @@ local function compile(src, dest)
                     bin[#bin + 1] = instruction.opcode
                     bin[#bin + 1] = instruction.oprand
 
+
+
+
                 elseif token[1] == "pop" then
                     local size = sizes[token[2]]
                     if not size then
@@ -246,12 +256,63 @@ local function compile(src, dest)
                     bin[#bin + 1] = instruction.opcode
                     bin[#bin + 1] = instruction.oprand
 
+
+
+
                 elseif token[1] == "cmov" then
-                    print("cmov")
+                    local size = sizes[token[2]]
+                    if not size then
+                        print("Error occered! Line " .. ln .. " has an incorrect size value!")
+                        return false
+                    end
+                    
+                    -- or together opcode and size of oprands
+                    instruction.opcode = bit.bor(bit.lshift(math.log(size, 2), 6), instructions[token[1]].opcode)
+    
+                    -- Get condition 1
+                    local cond = registers[token[4]]
+                    if cond == nil then
+                        print("Error occered! Line " .. ln .. " has bad opprand 1!")
+                        return false
+                    end
+                    instruction.condition = cond
+
+                    -- Get oprand 1 check if mem ref first then default to reg
+                    local opr1 = extract_mem(token[4])
+                    if opr1 then
+                        instruction.opcode = bit.bor(bit.lshift(1, 5), instruction.opcode)
+                        opr1 = registers[opr1]
+                    else
+                        opr1 = registers[token[4]]
+                    end
+                    if opr1 == nil then
+                        print("Error occered! Line " .. ln .. " has bad opprand 1!")
+                        return false
+                    end
+                    instruction.oprand = bit.bor(instruction.oprand, bit.lshift(opr1, 4)) 
+                    
+                    -- Get oprand 2 check if mem ref first then default to reg
+                    local opr2 = extract_mem(token[5])
+                    if opr2 then
+                        instruction.opcode = bit.bor(bit.lshift(1, 4), instruction.opcode)
+                        opr2 = registers[opr2]
+                    else
+                        opr2 = registers[token[5]]
+                    end
+                    if opr2 == nil then
+                        print("Error occered! Line " .. ln .. " has bad opprand 2!")
+                        return false
+                    end
+                    instruction.oprand = bit.bor(instruction.oprand, opr2) 
+                    
+
+                    bin[#bin + 1] = instruction.opcode
+                    bin[#bin + 1] = instruction.condition
+                    bin[#bin + 1] = instruction.oprand
+
 
                 elseif token[1] == "xtn" then
                     print("xtn")
-                    
                 else
                     print("Error occered! Line " .. ln .. " has invalid instruction!")
                     --return false
