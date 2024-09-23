@@ -145,6 +145,8 @@ local function compile(src, dest)
     local current_lable = ""
     local bin = {}
 
+    -- Add label gen loop that gets offsets
+
     for ln, token in ipairs(tokens) do
         if token[1] then
             local instruction = {
@@ -253,7 +255,13 @@ local function compile(src, dest)
                 bin[#bin + 1] = instruction.opcode
                 bin[#bin + 1] = instruction.oprand
 
-                print(token[4])
+                if tonumber(token[4]) then
+                    -- Is number
+                elseif lables[token[4]] then
+                    -- Is lable
+                else
+                    -- Handel string form or throw error
+                end
 
 			    print("Args not recived!")
 
