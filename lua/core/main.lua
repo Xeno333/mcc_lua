@@ -3,6 +3,8 @@ mcc = {}
 mcc.code_path = "lua/"
 mcc.compilers = {}
 
+deubug = true
+
 
 -- Check what system we are running on so we know how to handel paths
 is_windows = package.config:sub(1, 1) == "\\" or false

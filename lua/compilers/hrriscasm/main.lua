@@ -141,6 +141,8 @@ local function compile(src, dest)
         return false
     end
 
+    local lables = {}
+    local current_lable = ""
     local bin = {}
 
     for ln, token in ipairs(tokens) do
@@ -152,8 +154,35 @@ local function compile(src, dest)
 
             local type = nil
 
+            if string.sub(token[1], -1) == ":" then
+                current_lable = string.sub(token[1], 1, -2)
+                if not current_lable then
+                    print("Error occered! Line " .. ln .. " has bad lable!")
+                    return false
+                elseif lables[current_lable] then 
+                    print("Error occered! Line " .. ln .. " defines a lable that already exists <" .. current_lable .. ">!")
+                    return false
+                elseif tonumber(current_lable) then 
+                    print("Error occered! Line " .. ln .. " defines with bad name <" .. current_lable .. ">!")
+                    return false
+                end
+                if deubug == true then print("Making lable " .. current_lable ) end
+                lables[current_lable] = #bin
+
+            elseif token[1] == "db" then
+                print("db")
+            elseif token[1] == "dw" then
+                print("db")
+            elseif token[1] == "dd" then
+                print("db")
+            elseif token[1] == "dq" then
+                print("db")
+
+            -- instructions
+
             -- handel instructions as 2 types, "normal" aka set length and "hm" aka annoying
-            if instructions[token[1]] and instructions[token[1]].operand_c == 2 and not instructions[token[1]].complex then
+            elseif instructions[token[1]] and instructions[token[1]].operand_c == 2 and not instructions[token[1]].complex then
+                if deubug == true then print("Assembling " .. token[1]) end
                 local size = sizes[token[2]]
                 if not size then
                     print("Error occered! Line " .. ln .. " has an incorrect size value!")
@@ -196,10 +225,41 @@ local function compile(src, dest)
 
                 
             else
-                if token[1] == "set" then
-                    print("set")
+          	if token[1] == "set" then
+                if deubug == true then print("Assembling " .. token[1]) end
+                local size = sizes[token[2]]
+                if not size then
+                    print("Error occered! Line " .. ln .. " has an incorrect size value!")
+                    return false
+                end
+
+                -- or together opcode and size of oprands
+                instruction.opcode = bit.bor(bit.lshift(math.log(size, 2), 6), instructions[token[1]].opcode)
+
+                -- Get oprand 1 check if mem ref first then default to reg
+                local opr1 = extract_mem(token[3])
+                if opr1 then
+                    instruction.opcode = bit.bor(bit.lshift(1, 5), instruction.opcode)
+                    opr1 = registers[opr1]
+                else
+                    opr1 = registers[token[3]]
+                end
+                if opr1 == nil then
+                    print("Error occered! Line " .. ln .. " has bad opprand 1!")
+                    return false
+                end
+                instruction.oprand = bit.bor(instruction.oprand, bit.lshift(opr1, 4))
+
+                bin[#bin + 1] = instruction.opcode
+                bin[#bin + 1] = instruction.oprand
+
+                print(token[4])
+
+			    print("Args not recived!")
+
 
                 elseif token[1] == "push" then
+                    if deubug == true then print("Assembling " .. token[1]) end
                     local size = sizes[token[2]]
                     if not size then
                         print("Error occered! Line " .. ln .. " has an incorrect size value!")
@@ -230,6 +290,7 @@ local function compile(src, dest)
 
 
                 elseif token[1] == "pop" then
+                    if deubug == true then print("Assembling " .. token[1]) end
                     local size = sizes[token[2]]
                     if not size then
                         print("Error occered! Line " .. ln .. " has an incorrect size value!")
@@ -260,6 +321,7 @@ local function compile(src, dest)
 
 
                 elseif token[1] == "cmov" then
+                    if deubug == true then print("Assembling " .. token[1]) end
                     local size = sizes[token[2]]
                     if not size then
                         print("Error occered! Line " .. ln .. " has an incorrect size value!")
@@ -315,7 +377,7 @@ local function compile(src, dest)
                     print("xtn")
                 else
                     print("Error occered! Line " .. ln .. " has invalid instruction!")
-                    --return false
+                    return false
                 end
             end
 
