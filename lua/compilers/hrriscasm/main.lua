@@ -25,43 +25,53 @@ end
 local instructions = {
     ["mul"] = {
         operand_c = 2,
-        opcode = 0
+        opcode = 0,
+        size = 2
     },
     ["div"] = {
         operand_c = 2,
-        opcode = 1
+        opcode = 1,
+        size = 2
     },
     ["mod"] = {
         operand_c = 2,
-        opcode = 2
+        opcode = 2,
+        size = 2
     },
     ["add"] = {
         operand_c = 2,
-        opcode = 3
+        opcode = 3,
+        size = 2
     },
     ["sub"] = {
         operand_c = 2,
-        opcode = 4
+        opcode = 4,
+        size = 2
     },
     ["or"] = {
         operand_c = 2,
-        opcode = 5
+        opcode = 5,
+        size = 2
     },
     ["and"] = {
         operand_c = 2,
-        opcode = 6
+        opcode = 6,
+        size = 2
     },
     ["xor"] = {
         operand_c = 2,
-        opcode = 7
+        opcode = 7,
+        size = 2
     },
     ["not"] = {
         operand_c = 1,
-        opcode = 8
+        opcode = 8,
+        size = 2
     },
     ["mov"] = {
         operand_c = 2,
-        opcode = 9
+        opcode = 9,
+        size = 2
     },
     ["set"] = {
         operand_c = 2,
@@ -72,21 +82,25 @@ local instructions = {
     ["push"] = {
         operand_c = 1,
         opcode = 11,
-        complex = true
+        complex = true,
+        size = 2
     },
     ["pop"] = {
         operand_c = 1,
         opcode = 12,
-        complex = true
+        complex = true,
+        size = 2
     },
     ["cmp"] = {
         operand_c = 2,
-        opcode = 13
+        opcode = 13,
+        size = 2
     },
     ["cmov"] = {
         operand_c = 3,
         opcode = 14,
-        complex = true
+        complex = true,
+        size = 3
     },
     ["xtn"] = {
         opcode = 15,
