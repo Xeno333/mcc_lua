@@ -411,7 +411,7 @@ local function compile(src, dest)
         end
     end
 
-    print("\n\n")
+    print("\n")
     
 
     local i = 0
