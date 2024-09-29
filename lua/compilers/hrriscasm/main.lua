@@ -25,53 +25,43 @@ end
 local instructions = {
     ["mul"] = {
         operand_c = 2,
-        opcode = 0,
-        size = 2
+        opcode = 0
     },
     ["div"] = {
         operand_c = 2,
-        opcode = 1,
-        size = 2
+        opcode = 1
     },
     ["mod"] = {
         operand_c = 2,
-        opcode = 2,
-        size = 2
+        opcode = 2
     },
     ["add"] = {
         operand_c = 2,
-        opcode = 3,
-        size = 2
+        opcode = 3
     },
     ["sub"] = {
         operand_c = 2,
-        opcode = 4,
-        size = 2
+        opcode = 4
     },
     ["or"] = {
         operand_c = 2,
-        opcode = 5,
-        size = 2
+        opcode = 5
     },
     ["and"] = {
         operand_c = 2,
-        opcode = 6,
-        size = 2
+        opcode = 6
     },
     ["xor"] = {
         operand_c = 2,
-        opcode = 7,
-        size = 2
+        opcode = 7
     },
     ["not"] = {
         operand_c = 1,
-        opcode = 8,
-        size = 2
+        opcode = 8
     },
     ["mov"] = {
         operand_c = 2,
-        opcode = 9,
-        size = 2
+        opcode = 9
     },
     ["set"] = {
         operand_c = 2,
@@ -82,25 +72,21 @@ local instructions = {
     ["push"] = {
         operand_c = 1,
         opcode = 11,
-        complex = true,
-        size = 2
+        complex = true
     },
     ["pop"] = {
         operand_c = 1,
         opcode = 12,
-        complex = true,
-        size = 2
+        complex = true
     },
     ["cmp"] = {
         operand_c = 2,
-        opcode = 13,
-        size = 2
+        opcode = 13
     },
     ["cmov"] = {
         operand_c = 3,
         opcode = 14,
-        complex = true,
-        size = 3
+        complex = true
     },
     ["xtn"] = {
         opcode = 15,
@@ -158,8 +144,6 @@ local function compile(src, dest)
     local lables = {}
     local current_lable = ""
     local bin = {}
-
-    -- Add label gen loop that gets offsets
 
     for ln, token in ipairs(tokens) do
         if token[1] then
@@ -241,44 +225,40 @@ local function compile(src, dest)
 
                 
             else
-          	if token[1] == "set" then
-                if deubug == true then print("Assembling " .. token[1]) end
-                local size = sizes[token[2]]
-                if not size then
-                    print("Error occered! Line " .. ln .. " has an incorrect size value!")
-                    return false
-                end
+                if token[1] == "set" then
+                    if deubug == true then print("Assembling " .. token[1]) end
+                    local size = sizes[token[2]]
+                    if not size then
+                        print("Error occered! Line " .. ln .. " has an incorrect size value!")
+                        return false
+                    end
 
-                -- or together opcode and size of oprands
-                instruction.opcode = bit.bor(bit.lshift(math.log(size, 2), 6), instructions[token[1]].opcode)
+                    -- or together opcode and size of oprands
+                    instruction.opcode = bit.bor(bit.lshift(math.log(size, 2), 6), instructions[token[1]].opcode)
 
-                -- Get oprand 1 check if mem ref first then default to reg
-                local opr1 = extract_mem(token[3])
-                if opr1 then
-                    instruction.opcode = bit.bor(bit.lshift(1, 5), instruction.opcode)
-                    opr1 = registers[opr1]
-                else
-                    opr1 = registers[token[3]]
-                end
-                if opr1 == nil then
-                    print("Error occered! Line " .. ln .. " has bad opprand 1!")
-                    return false
-                end
-                instruction.oprand = bit.bor(instruction.oprand, bit.lshift(opr1, 4))
+                    -- Get oprand 1 check if mem ref first then default to reg
+                    local opr1 = extract_mem(token[3])
+                    if opr1 then
+                        instruction.opcode = bit.bor(bit.lshift(1, 5), instruction.opcode)
+                        opr1 = registers[opr1]
+                    else
+                        opr1 = registers[token[3]]
+                    end
+                    if opr1 == nil then
+                        print("Error occered! Line " .. ln .. " has bad opprand 1!")
+                        return false
+                    end
+                    instruction.oprand = bit.bor(instruction.oprand, bit.lshift(opr1, 4))
 
-                bin[#bin + 1] = instruction.opcode
-                bin[#bin + 1] = instruction.oprand
+                    bin[#bin + 1] = instruction.opcode
+                    bin[#bin + 1] = instruction.oprand
 
-                if tonumber(token[4]) then
-                    -- Is number
-                elseif lables[token[4]] then
-                    -- Is lable
-                else
-                    -- Handel string form or throw error
-                end
-
-			    print("Args not recived!")
-
+                    if tonumber(token[4]) then
+                        print("Error occered! Line " .. ln .. " Tries to use imidient value, this isn't supported yet!")
+                        return false
+                    else
+                        bin[#bin + 1] = {token = token[4], size = size}
+                    end
 
                 elseif token[1] == "push" then
                     if deubug == true then print("Assembling " .. token[1]) end
@@ -406,6 +386,27 @@ local function compile(src, dest)
             if type == "norm" then
                 bin[#bin + 1] = instruction.opcode
                 bin[#bin + 1] = instruction.oprand
+            end
+        end
+    end
+
+    -- itterate and add hanfing for tables
+    for i, byte in ipairs(bin) do
+        if type(byte) == "table" then
+            local lable = byte.token
+            local size = byte.size
+            local str = string.format("%0" .. size*2 .. "X", lables[lable])
+
+            local result = {}
+            local first = true
+            for d = 1, #str, 2 do
+                if first then
+                    bin[i] = tonumber(str:sub(d, d+1), 16)
+                    first = nil
+                else
+                    table.insert(bin, i, tonumber(str:sub(d, d+1), 16))
+                end
+                
             end
         end
     end
