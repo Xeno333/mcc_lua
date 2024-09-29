@@ -1,6 +1,6 @@
 
 main:
-    set q r1, data_123
+    set q r1, 0x116
     mov q r2, [r1]
     xor q r2, r2
     xor q r0, r0

@@ -254,10 +254,9 @@ local function compile(src, dest)
                     bin[#bin + 1] = instruction.oprand
 
                     if tonumber(token[4]) then
-                        print("Error occered! Line " .. ln .. " Tries to use imidient value, this isn't supported yet!")
-                        return false
+                        bin[#bin + 1] = {v="num", token = token[4], size = size}
                     else
-                        bin[#bin + 1] = {token = token[4], size = size}
+                        bin[#bin + 1] = {v="lable", token = token[4], size = size}
                     end
 
                 elseif token[1] == "push" then
@@ -393,19 +392,47 @@ local function compile(src, dest)
     -- itterate and add hanfing for tables
     for i, byte in ipairs(bin) do
         if type(byte) == "table" then
-            local lable = byte.token
-            local size = byte.size
-            local str = string.format("%0" .. size*2 .. "X", lables[lable])
+            if byte.v == "lable" then
+                local lable = byte.token
+                local size = byte.size
+                local str = string.format("%0" .. size*2 .. "X", lables[lable])
 
-            local result = {}
-            local first = true
-            for d = 1, #str, 2 do
-                if first then
-                    bin[i] = tonumber(str:sub(d, d+1), 16)
-                    first = nil
-                else
-                    table.insert(bin, i, tonumber(str:sub(d, d+1), 16))
+                local result = {}
+                local first = true
+                for d = 1, #str, 2 do
+                    if first then
+                        bin[i] = tonumber(str:sub(d, d+1), 16)
+                        first = nil
+                    else
+                        table.insert(bin, i, tonumber(str:sub(d, d+1), 16))
+                    end
+                    
                 end
+            elseif byte.v == "num" then
+                local num = byte.token
+                local size = byte.size
+                local str
+
+                if string.sub(num, 1, 2) == "0x" then
+                    str = string.format("%0" .. size*2 .. "X", tonumber(num, 16))
+                else
+                    str = string.format("%0" .. size*2 .. "X", tonumber(num))
+                end
+
+                local result = {}
+                local first = true
+                for d = 1, #str, 2 do
+                    if first then
+                        bin[i] = tonumber(str:sub(d, d+1), 16)
+                        first = nil
+                    else
+                        table.insert(bin, i, tonumber(str:sub(d, d+1), 16))
+                    end
+                    
+                end
+            else
+                print("Error occered! There is a bad argument to a 'set' instruction!")
+                return false
                 
             end
         end
