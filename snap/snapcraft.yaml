@@ -1,6 +1,7 @@
 name: mlcc
 version: '0.1.0-dev'
 summary: MIT Licensed Compiler Collection
+grade: devel
 description: |
   MIT Licensed Compiler Collection, or mlcc. Written in lua, and designed to use luaJIT for speed.
 
