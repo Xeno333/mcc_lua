@@ -1,7 +1,7 @@
-mcc = {}
+mlcc = {}
 
-mcc.code_path = "lua/"
-mcc.compilers = {}
+mlcc.code_path = "lua/"
+mlcc.compilers = {}
 
 deubug = true
 
@@ -10,7 +10,7 @@ deubug = true
 is_windows = package.config:sub(1, 1) == "\\" or false
 
 -- convert
-function mcc.convert_path(path)
+function mlcc.convert_path(path)
     if is_windows then
         return path:gsub("/", "\\")
     end
@@ -18,15 +18,15 @@ function mcc.convert_path(path)
 end
 
 
-dofile(mcc.convert_path(mcc.code_path .. "core/conf.lua"))
-dofile(mcc.convert_path(mcc.code_path .. "core/core.lua"))
+dofile(mlcc.convert_path(mlcc.code_path .. "core/conf.lua"))
+dofile(mlcc.convert_path(mlcc.code_path .. "core/core.lua"))
 
 
 
 -- Commands
 local function help()
-    return "MIT licensed Compiler Collection " .. mcc.conf.version .. 
-        "\nUsage: mcc <params>\n" .. 
+    return "MIT Licensed Compiler Collection " .. mlcc.conf.version .. 
+        "\nUsage: mlcc <params>\n" .. 
             "\tParams [key=value]:\n"..
                 "\t\t?=<command> [string]\n" .. 
                     "\t\t\thelp\t-Display this help message\n" .. 
@@ -49,10 +49,10 @@ end
 
 
 local function compile(params)
-    if params["lang"] and mcc.conf.langs[params["lang"]] then
-        local path = mcc.code_path .. "compilers/" .. params["lang"] .. "/"
-        dofile(mcc.convert_path(path .."main.lua"))
-        return mcc.compilers[params["lang"]].main(params, path)
+    if params["lang"] and mlcc.conf.langs[params["lang"]] then
+        local path = mlcc.code_path .. "compilers/" .. params["lang"] .. "/"
+        dofile(mlcc.convert_path(path .."main.lua"))
+        return mlcc.compilers[params["lang"]].main(params, path)
     end
     return "Error: Failed! No such languge!"
 end
@@ -71,7 +71,7 @@ local requests = {
 local params = {}
 
 if #arg < 1 then
-    print("No args supplied, use 'mcc ?=help' for help.")
+    print("No args supplied, use 'mlcc ?=help' for help.")
 end
 
 for _, str in ipairs(arg) do

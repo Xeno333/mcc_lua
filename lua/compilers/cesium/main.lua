@@ -1,6 +1,6 @@
 cesium = {}
 -- Include compiler
-mcc.compilers["cesium"] = cesium
+mlcc.compilers["cesium"] = cesium
 local code_path = nil
 
 local header = 

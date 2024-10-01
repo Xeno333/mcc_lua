@@ -1,3 +1,3 @@
-mcc.core = {}
+mlcc.core = {}
 
-local core = mcc.core
+local core = mlcc.core

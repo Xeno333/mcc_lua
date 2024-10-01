@@ -1,22 +1,22 @@
-name: mcc
+name: mlcc
 version: '0.1.0-dev'
-summary: MIT licensed Compiler Collection
+summary: MIT Licensed Compiler Collection
 description: |
-  MIT licensed Compiler Collection, or mcc. Written in lua, and designed to use luaJIT for speed.
+  MIT Licensed Compiler Collection, or mlcc. Written in lua, and designed to use luaJIT for speed.
 
 confinement: strict
 
 base: core20
 
 parts:
-  mcc:
+  mlcc:
     source: .
     plugin: dump
     stage-packages:
       - luajit
 
 apps:
-  mcc:
+  mlcc:
     command: usr/bin/luajit lua/core/main.lua
     plugs:
       - home

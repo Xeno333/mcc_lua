@@ -1,6 +1,6 @@
-mcc.conf = {}
+mlcc.conf = {}
 
-local conf = mcc.conf
+local conf = mlcc.conf
 
 conf.version = "v0.1.0-dev"
 

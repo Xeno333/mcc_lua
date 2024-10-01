@@ -1,6 +1,6 @@
 hrriscasm = {}
 -- Include compiler
-mcc.compilers["hrriscasm"] = hrriscasm
+mlcc.compilers["hrriscasm"] = hrriscasm
 local code_path = nil
 
 require("bit")
