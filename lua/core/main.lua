@@ -1,6 +1,16 @@
 mlcc = {}
 
-mlcc.code_path = "lua/"
+local srl = ""
+
+for i, str in ipairs(arg) do
+    local key, value = str:match("^(.-):(.*)$")
+	if key == "SRL" then 
+		srl = value .. "/"
+		table.remove(arg, i)
+	end
+end
+
+mlcc.code_path = srl .. "lua/"
 mlcc.compilers = {}
 
 deubug = true
