@@ -47,7 +47,7 @@ local function help()
 
                 "\n\t\tsrc=<source files> [list]\n" ..
 
-                "\n\t\tdst=<destination file> [string]\n" .. 
+                "\n\t\tdest=<destination file> [string]\n" .. 
 
                 "\n\t\tformat=<format of output> [string]\n" ..
                     "\t\t\tcsrc\t-C source file\n" --[[..
