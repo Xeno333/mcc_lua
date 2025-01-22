@@ -1,6 +1,8 @@
 cesium.parser = {}
 
 
+-- returns tokenized table of tables representing parts
+
 function cesium.parser.parse(src)
     -- open file and check error
     local file, err = io.open(src, "r")
@@ -10,7 +12,9 @@ function cesium.parser.parse(src)
     end
 
     -- get src file
-    local src_code = file:read("*a")
+    local src_code = file:read("*a") or ""
+
+    print(src_code)
 
     -- Token table that we will return
     local tokens = {}
@@ -47,7 +51,6 @@ function cesium.parser.parse(src)
     end
 
     for _, line in ipairs(lines) do
-        print(line)
         local tokens_l = {""}
         for i=1,#line do
             local c = line:sub(i, i)
@@ -70,6 +73,9 @@ function cesium.parser.parse(src)
     end
 
     file:close()
+
+
+    -- remove extra blank spaces
 
     return tokens
 end

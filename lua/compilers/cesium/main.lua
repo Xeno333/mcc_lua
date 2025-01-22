@@ -13,9 +13,7 @@ local header =
 
 
 
-local def_var_ids = {
-    ["mut"] = true,
-
+local types = {
     ["i8"]  = "singed char",
     ["i16"] = "singed short",
     ["i32"] = "singed int",
@@ -30,12 +28,20 @@ local def_var_ids = {
     ["f64"] = "double float",
 
     ["bool"] = "bool",
-    ["enum"] = "enum",
+    ["enum"] = "enum"
 }
+
+local def_var_ids = types
+types["mut"] = true
 
 
 
 local function compile(src, dest)
+    -- Error tabel
+    local errors = {}
+
+
+
     local tokens = cesium.parser.parse(src)
     if tokens == false or tokens == nil then
         return false
@@ -44,8 +50,11 @@ local function compile(src, dest)
     local defined = {}
     local csrc_lines = {}
 
+    -- Main loop
     for _, statment in ipairs(tokens) do
         local line = ""
+
+        -- Vars
         if def_var_ids[statment[1]] then
             line = "const "
             local i = 1
@@ -59,7 +68,31 @@ local function compile(src, dest)
             for p=i,#statment do
                 line = line .. statment[p]
             end
+
+        -- Funcs
+        elseif statment[1] == "func" then
+            if not statment[1] then
+                errors[#errors+1] = "Error: No function name!"
+            end
+
+            local type = "void"
+            local index = #statment
+            if statment[#statment] == "{" then index = index - 1 end
+            
+            for _, v in ipairs(statment) do
+                print(v)
+            end
+
+            if statment[index] ~= ")" and statment[index-1] == ":" then
+                print("A")
+            else
+                errors[#errors+1] = "Error: Invalid return type for '" .. statment[2] .. "'"
+            end
         end
+
+
+
+
 
         if line then
             if line ~= "" then
@@ -71,6 +104,14 @@ local function compile(src, dest)
 
     for _, line in ipairs(csrc_lines) do
         print(line)
+    end
+
+    if #errors ~= 0 then
+        for _, e in ipairs(errors) do
+            print(e)
+        end
+
+        return false
     end
 
     return true
