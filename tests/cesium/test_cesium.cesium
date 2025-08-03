@@ -1,8 +1,12 @@
-
+import "stdlib.cesium"
 
 u8* str = "Hello, World"
 
-func main() : i32 {
-	print(str)
+~c "tests/cesium/inc.c"
+~ref cesium_print_test
+
+func main() : i64 {
+	printf("%s # %llu\n", str, getstrlen(str))
+	print("Hello from stdlib.cesium")
 	return 0
 }

@@ -1,19 +1,26 @@
-#startc
-    #include<stdio.h>
-    #include<stdlib.h>
-    #include<string.h>
-#endc
+c {
+    #include "stdio.h"
+    #include "stdlib.h"
+    #include "string.h"
 
-
-
-
-func getstrlen(u8* str) : u64 {
-    mut u64 r = 0
-    while (str[r] != 0) {
-        r++
+    const unsigned long long cesium_ptr_to_u64(const void* v) {
+        return (const unsigned long long)v;
     }
-    r++
-    return r
+}
+
+ref printf i32
+ref malloc u8*
+ref cesium_ptr_to_u64 u64
+
+
+func getstrlen(u8* getstrlen_str) : u64 {
+    ref getstrlen_str u8*
+    mut u64 getstrlen_r = 0
+    while (getstrlen_str[getstrlen_r] != 0) {
+        getstrlen_r++
+    }
+    getstrlen_r++
+    return getstrlen_r
 }
 
 func printbool(bool v) {
@@ -25,6 +32,40 @@ func printbool(bool v) {
 	}
 }
 
+func print(u8* s) {
+    printf("%s\n", s)
+}
+
+~ Files
+
+c {
+    const unsigned long long* cesium_fopen(const unsigned char* fn, const unsigned char* m) {
+        return (const unsigned long long*)fopen((char*)fn, (char*)m);
+    }
+    const signed long long cesium_fwrite(const unsigned char* block, const unsigned long long size, const unsigned long long len, const unsigned long long* f) {
+        return fwrite((void*)block, size, len, (FILE*)f);
+    }
+    const signed long long cesium_fread(const unsigned char* block, const unsigned long long size, const unsigned long long len, const unsigned long long* f) {
+        return fread((void*)block, size, len, (FILE*)f);
+    }
+    const signed long long cesium_fclose(const unsigned long long* f) {
+        return fclose((FILE*)f);
+    }
+    const void cesium_fseek(const unsigned long long* f, const unsigned long long start, const unsigned long long end) {
+        fseek((FILE*)f, start, end);
+    }
+    const signed long long cesium_ftell(const unsigned long long* f) {
+        return ftell((FILE*)f);
+    }
+}
+
+ref SEEK_ENDfwrite
+ref cesium_fopen u64*
+ref cesium_fwrite i64
+ref cesium_fread i64
+ref cesium_fclose i64
+ref cesium_fseek
+ref cesium_ftell i64
 
 func append(u8* fn, u8* block, u64 size) : i32 {
 	u64* f = fopen(fn, "a")
@@ -33,23 +74,24 @@ func append(u8* fn, u8* block, u64 size) : i32 {
 	return 0
 }
 
+
 func fsize(u8* fn) : u64 {
-    u64 f = (fopen(fn, "rb") : u64)
+    u64* f = fopen(fn, "rb")
     fseek(f, 0, SEEK_END)
     u64 size = ftell(f)
     fclose(f)
     return size
 }
 
-func fget(u8* fn) : u8* {
-    u64 f = (fopen(fn, "rb") : u64)
-	if (f == NULL) {
-		return NULL
+func fget(u8* fn) : u64 {
+    u64* f = fopen(fn, "rb")
+	if (f == 0) {
+		return 0
 	}
     u64 size = fsize(fn)
     mut u8* block = malloc(size+1)
     fread(block, 1, size, f)
     fclose(f)
     block[size+1] = 0
-    return block
+    return cesium_ptr_to_u64(block)
 }

@@ -11,6 +11,7 @@ for i, str in ipairs(arg) do
 end
 
 mlcc.code_path = srl .. "lua/"
+mlcc.libs_path = srl .. "lib/"
 mlcc.compilers = {}
 
 deubug = true
@@ -28,6 +29,7 @@ function mlcc.convert_path(path)
 end
 
 
+mlcc.libs_path = mlcc.convert_path(mlcc.libs_path)
 dofile(mlcc.convert_path(mlcc.code_path .. "core/conf.lua"))
 dofile(mlcc.convert_path(mlcc.code_path .. "core/core.lua"))
 

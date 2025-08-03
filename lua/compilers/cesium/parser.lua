@@ -1,81 +1,88 @@
 cesium.parser = {}
 
+local comp = {
+    ["="] = true,
+    ["!"] = true,
+    [">"] = true,
+    ["<"] = true
+}
 
--- returns tokenized table of tables representing parts
 
-function cesium.parser.parse(src)
-    -- open file and check error
-    local file, err = io.open(src, "r")
-    if not file then
-        print("Failed: Error opening file: " .. err)
-        return false
-    end
+function cesium.parser.parse(src, comp_conf)
+    local statements_l = mlcc.core.default_parser(src)
 
-    -- get src file
-    local src_code = file:read("*a") or ""
 
-    print(src_code)
+    -- Combine some parts into proper tokens
+    local statements = {}
+    local consts = {}
 
-    -- Token table that we will return
-    local tokens = {}
+    local pos = 0
+    local comment = false
+    while true do
+        pos = pos + 1
+        local statement_l = statements_l[pos]
+        if statement_l == nil then break end
 
-    local lines = {""}
+        local statement = {}
+        local lskip = false
+        local skip = false
 
-    local sep_chars = "()[]{} !><= ~^&| %/-+ * , ?"
-    local break_chars = ";\n"
-    local quote = false
-    local esc = nil
-    local c_flag = false
+        if statement_l[1] == "~" then
+            if statement_l[2] == "~" then
+                comment = not comment
+            end
 
-    for i=1,#src_code do
-        local c = src_code:sub(i, i)
-        if c == "\\" then
-            esc = 0
-        end 
-        if esc and esc > 0 then esc = nil end
-        if esc ~= nil then esc = esc + 1 end
+        elseif comment then
+            
+        elseif statement_l[1] == "import" then
+            local tokens_l = cesium.parser.parse(mlcc.libs_path .. "cesium/" .. string.sub(statement_l[2], 2, -2))
+            if tokens_l == false or tokens_l == nil then
+                return false
+            end
 
-        if (not esc) and c == "\"" or c == "'" then
-            quote = not quote
-        end
+            local tokens_n = {}
+            for i = 1, pos-1 do
+                tokens_n[#tokens_n+1] = statements_l[i]
+            end
+            for _, v in ipairs(tokens_l) do
+                tokens_n[#tokens_n+1] = v
+            end
+            for i = pos+1, #statements_l do
+                tokens_n[#tokens_n+1] = statements_l[i]
+            end
 
-        if (not esc) and quote == true then
-            lines[#lines] = lines[#lines] .. c
-
-        elseif (not esc) and break_chars:find(c, 1, true) then
-            lines[#lines+1] = ""
+            statements_l = tokens_n
+            pos = pos - 1
 
         else
-            lines[#lines] = lines[#lines] .. c
+            for i = 1, #statement_l do
+                if not lskip then
+                    local v = statement_l[i]
+
+                    if statement_l[i+1] == "=" then
+                        if comp[v] then
+                            v = v .. "="
+                            lskip = true
+                        end
+
+                    elseif statement_l[i+1] == "+" and v == "+" then
+                        v = "++"
+                        lskip = true
+
+                    elseif statement_l[i+1] == "-" and v == "-" then
+                        v = "--"
+                        lskip = true
+                    end
+
+                    statement[#statement+1] = v
+                else
+                    lskip = false
+                end
+            end
+
+            statements[#statements+1] = statement
         end
     end
 
-    for _, line in ipairs(lines) do
-        local tokens_l = {""}
-        for i=1,#line do
-            local c = line:sub(i, i)
-            if c == "\"" or c == "'" then
-                quote = not quote
-            end
-
-            if quote == true then
-                tokens_l[#tokens_l] = tokens_l[#tokens_l] .. c
-
-            elseif sep_chars:find(c, 1, true) then
-                tokens_l[#tokens_l+1] = c
-                tokens_l[#tokens_l+1] = ""
-
-            else
-                tokens_l[#tokens_l] = tokens_l[#tokens_l] .. c
-            end
-        end
-        tokens[#tokens+1] = tokens_l
-    end
-
-    file:close()
-
-
-    -- remove extra blank spaces
-
-    return tokens
+    return statements, consts
 end
