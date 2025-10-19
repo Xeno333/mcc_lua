@@ -144,7 +144,7 @@ int main(signed int argc_passed, signed char** args_passed) {
 
         if statement_t == "c" then
             endl = false
-            c_statement = statement_i
+            c_statement = {"\n//********* Start C include *********\n\n" .. statement_i[1] .. "\n// ********* End C include *********"}
 
         else
             local statement = {}

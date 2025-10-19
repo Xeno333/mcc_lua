@@ -59,7 +59,7 @@ c {
     }
 }
 
-ref SEEK_ENDfwrite
+ref SEEK_END
 ref cesium_fopen u64*
 ref cesium_fwrite i64
 ref cesium_fread i64

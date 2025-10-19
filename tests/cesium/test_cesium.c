@@ -17,6 +17,9 @@ int main(signed int argc_passed, signed char** args_passed) {
 // ********* End Cesium Header *********
 
 
+
+//********* Start C include *********
+
 #include "stdio.h"
 #include "stdlib.h"
 #include "string.h"
@@ -24,6 +27,7 @@ const unsigned long long cesium_ptr_to_u64 ( const void * v ) {;
 return ( const unsigned long long ) v;
 };
 
+// ********* End C include *********
 
 unsigned long long cesium_getstrlen (const unsigned char* cesium_2_getstrlen_str) {
 	unsigned long long cesium_2_getstrlen_r = 0;
@@ -49,6 +53,9 @@ void cesium_printbool (const bool cesium_4_v) {
 void cesium_print (const unsigned char* cesium_7_s) {
 	printf ("%s\n", cesium_7_s);
 };
+
+//********* Start C include *********
+
 const unsigned long long * cesium_fopen ( const unsigned char * fn , const unsigned char * m ) {;
 return ( const unsigned long long * ) fopen ( ( char * ) fn , ( char * ) m );
 };
@@ -68,6 +75,7 @@ const signed long long cesium_ftell ( const unsigned long long * f ) {;
 return ftell ( ( FILE * ) f );
 };
 
+// ********* End C include *********
 
 signed int cesium_append (const unsigned char* cesium_15_fn, const unsigned char* cesium_15_block, const unsigned long long cesium_15_size) {
 	const unsigned long long* cesium_15_f = cesium_fopen (cesium_15_fn, "a");
