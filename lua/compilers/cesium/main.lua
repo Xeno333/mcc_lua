@@ -254,13 +254,23 @@ int main(signed int argc_passed, signed char** args_passed) {
 
             else
                 for _, v in ipairs(statement) do
+                    local last = string.sub(v, -1)
+                    local first = string.sub(v, 1, 1)
+
+                    -- instruction
                     if passthrough[v] ~= nil then
                         c_statement[#c_statement+1] = v
 
+                    -- refrence
                     elseif defined[v] then
                         c_statement[#c_statement+1] = v
 
+                    -- number
                     elseif tonumber(v) ~= nil then
+                        c_statement[#c_statement+1] = v
+
+                    -- string
+                    elseif (first == "'" and last == "'") or (first == "\"" and last == "\"") then
                         c_statement[#c_statement+1] = v
 
                     else

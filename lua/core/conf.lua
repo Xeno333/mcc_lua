@@ -2,7 +2,7 @@ mlcc.conf = {}
 
 local conf = mlcc.conf
 
-conf.version = "v0.1.0-dev"
+conf.version = "v0.2.1"
 
 conf.langs = {
     ["cesium"] = true,

@@ -104,7 +104,6 @@ function cesium.tokenizer.tokenize(statements, comp_conf)
     local is_c_started = false
     local skip = false
     for _, statement in ipairs(statements) do
-            print(statement[#statement])
         if statement[1] == "c" then
             if string.sub(statement[2], 1, 1) == "\"" or string.sub(statement[2], 1, 1) == "\'" then
                 local fn = string.sub(statement[2], 2, -2)
@@ -237,7 +236,7 @@ function cesium.tokenizer.tokenize(statements, comp_conf)
         end
         consts[statement_l[2]\] = t]]
 
-    print(mlcc.core.dump(code))
+    --print(mlcc.core.dump(code))
 
     return code, defined
 end
