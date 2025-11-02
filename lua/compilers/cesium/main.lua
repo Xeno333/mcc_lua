@@ -97,7 +97,7 @@ local function compile(src, dest, comp_conf)
 // ********* Cesium Header *********
 
 typedef enum {false = 0, true = 1} bool;
-signed long long cesium_main();
+void cesium_main();
 
 ]]
 
@@ -170,7 +170,6 @@ int main(signed int argc_passed, signed char** args_passed) {
                 c_statement[#c_statement+1] = vtype
                 i = i + 1
 
-                local vname = nil
                 for p=i,#statement do
                     local v = statement[p]
                     c_statement[#c_statement+1] = v
